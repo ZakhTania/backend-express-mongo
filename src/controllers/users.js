@@ -1,5 +1,7 @@
 const User = require("../models/user");
 
+const err = "Пользлватель не найден или был запрошен несуществующий роут";
+
 // Получим всех пользователей из БД
 const getUsers = (req, res) => {
   User.find({})
@@ -7,7 +9,6 @@ const getUsers = (req, res) => {
       res.status(200).send(user);
     })
     .catch((e) => {
-      res.status(404).send(e.message);
       res.status(500).send(e.message);
     });
 };
@@ -17,10 +18,16 @@ const getUser = (req, res) => {
   const { user_id } = req.params;
   User.findById(user_id)
     .then((user) => {
+      if (!user) {
+        throw new Error(err);
+      }
       res.status(200).send(user);
     })
     .catch((e) => {
-      res.status(404).send(e.message);
+      if (e.message === err) {
+        res.status(404).send(e.message);
+        return;
+      }
       res.status(500).send(e.message);
     });
 };
@@ -33,7 +40,6 @@ const createUser = (req, res) => {
       res.status(201).send(user);
     })
     .catch((e) => {
-      res.status(404).send(e.message);
       res.status(500).send(e.message);
     });
 };
@@ -44,10 +50,16 @@ const updateUser = (req, res) => {
   const data = req.body;
   User.findByIdAndUpdate(user_id, data, { new: true, runValidators: true })
     .then((user) => {
+      if (!user) {
+        throw new Error(err);
+      }
       res.status(200).send(user);
     })
     .catch((e) => {
-      res.status(404).send(e.message);
+      if (e.message === err) {
+        res.status(404).send(e.message);
+        return;
+      }
       res.status(500).send(e.message);
     });
 };
@@ -57,10 +69,16 @@ const deleteUser = (req, res) => {
   const { user_id } = req.params;
   User.findByIdAndDelete(user_id)
     .then((user) => {
+      if (!user) {
+        throw new Error(err);
+      }
       res.status(200).send("Done");
     })
     .catch((e) => {
-      res.status(404).send(e.message);
+      if (e.message === err) {
+        res.status(404).send(e.message);
+        return;
+      }
       res.status(500).send(e.message);
     });
 };
